@@ -166,6 +166,8 @@ def main():
 
     result = program.single_query(interventions, evidence, queries, strategy=config.config["knowledge_compiler"])
     print(result)
+    result = program.multi_query(interventions, evidence, queries, strategy=config.config["knowledge_compiler"])
+    print(result)
 if __name__ == "__main__":
     main()
 
