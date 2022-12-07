@@ -4,13 +4,12 @@ from aspmc.programs.problogprogram import ProblogProgram
 Program module providing the algebraic progam class.
 """
 
-import numpy as np
 import logging
 
 from aspmc.programs.program import Rule
 
 
-
+from aspmc.config import config
 from aspmc.util import *
 from aspmc.programs.naming import *
 
@@ -65,6 +64,8 @@ class CounterfactualProgram(ProblogProgram):
             cur_name = self._external_name(atom)
             if cur_name not in self.evidence_atoms:
                 idx = cur_name.find("(")
+                if idx == -1:
+                    idx = len(cur_name)
                 new_name = cur_name[:idx]
                 new_name += "_" + postfix
                 new_name += cur_name[idx:]
@@ -101,43 +102,99 @@ class CounterfactualProgram(ProblogProgram):
         # now we can change the names of the intervention atoms
         for original_name, atom in self.intervention_atoms.items():
             idx = original_name.find("(")
+            if idx == -1:
+                idx = len(original_name)
             new_name = original_name[:idx]
             new_name += "_i"
             new_name += original_name[idx:]
             self._nameMap[atom] = new_name
 
+        # make sure there is always an atom true that is true
+        self.true = self._new_var("true")
+        self._deriv.add(self.true)
+
         self._program = new_program
 
 
-    def _prog_string(self, program):
-        result = ""
-        for v in self._guess:
-            result += f"{self.weights[self._internal_name(v)]}::{self._external_name(v)}.\n"
-        for r in program:
-            result += ";".join([self._external_name(v) for v in r.head])
-            if len(r.body) > 0:
-                result += ":-"
-                result += ",".join([("\\+ " if v < 0 else "") + self._external_name(abs(v)) for v in r.body])
-            result += ".\n"
-        return result
+    def single_query(self, interventions, evidence, queries, strategy="sharpsat-td"):
+        """Evaluates a single counterfactual query using the given strategy.
 
-    def _finalize_cnf(self):
-        weight_list = self.get_weights()
-        for v in range(self._max*2):
-            self._cnf.weights[to_dimacs(v)] = weight_list[v]
-        self._cnf.semirings = [ self.semiring ]
-        self._cnf.quantified = [ list(range(1, self._max + 1)) ]
+        Args:
+            interventions (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` should be intervened positively (phase == False) or negatively.
+            evidence (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` must have been true (phase == False) or false.
+            queries (list): A list of strings, indicating that we want to query the probabilities of the atoms
+                under the given interventions and evidence.
+            strategy (:obj:`string`, optional): The knowledge compiler to use. Possible values are 
+                * `pysdd` for bottom up compilation to SDDs,
+                * `c2d` for top down compilation to sd-DNNF with c2d,
+                * `miniC2D` for top down compilation to sd-DNNF with miniC2D,
+                * `d4` for top down compilation to sd-DNNF with d4,
+                * `sharpsat-td` for top down compilation to sd-DNNF with sharpsat-td.
+                Defaults to `sharpsat-td`.
+        Returns:
+            list: A list containing the results of the counterfactual queries in the order they were given in `queries`.
+        """
+        tmp_program = [ Rule([self.true],[]) ]
+        atom_interventions = { self.intervention_atoms[name] : phase for name, phase in interventions.items() }
+        for rule in self._program:
+            if len(rule.head) > 0:
+                if rule.head[0] in atom_interventions:
+                    continue
+            take = True
+            new_body = []
+            for atom in rule.body:
+                if not abs(atom) in atom_interventions:
+                    new_body.append(atom)
+                else:
+                    if atom_interventions[abs(atom)] != (atom < 0):
+                        take = False
+                        break
+            if take:
+                tmp_program.append(Rule(rule.head, new_body))
 
-    def get_weights(self):
-        query_cnt = max(len(self.queries), 1)
-        varMap = { name : var for var, name in self._nameMap.items() }
-        weight_list = [ np.full(query_cnt, self.semiring.one(), dtype=self.semiring.dtype) for _ in range(self._max*2) ]
-        for name in self.weights:
-            weight_list[to_pos(varMap[name])] = np.full(query_cnt, self.weights[name], dtype=self.semiring.dtype)
-            weight_list[neg(to_pos(varMap[name]))] = np.full(query_cnt, self.semiring.negate(self.weights[name]), dtype=self.semiring.dtype)
-        for i, query in enumerate(self.queries):
-            weight_list[neg(to_pos(varMap[query]))][i] = self.semiring.zero()
-        return weight_list
+        for name, phase in interventions.items():
+            if not phase:
+                atom = self.intervention_atoms[name]
+                tmp_program.append(Rule([ atom ], []))
 
-    def get_queries(self):
-        return self.queries
+        for name, phase in evidence.items():
+            atom = self.evidence_atoms[name]
+            if phase:
+                body = [ atom ]
+            else:
+                body = [ -atom ]
+            tmp_program.append(Rule([],body))
+
+        self.queries = [ "true" ]
+        self.queries += [ self._external_name(self.intervention_atoms[name]) for name in queries ]
+        program_string = self._prog_string(tmp_program)
+        inference_program = ProblogProgram(program_string, [])
+        
+        # evaluate the query using the given strategy
+        if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
+            # perform CNF conversion, followed by top down knowledge compilation
+            inference_program.tpUnfold()
+            inference_program.td_guided_both_clark_completion(adaptive = False, latest = True)
+            cnf = inference_program.get_cnf()
+            result = cnf.evaluate()
+            # reorder the query results
+            other_queries = inference_program.get_queries()
+            to_idx = { query : idx for idx, query in enumerate(other_queries) }
+            sorted_result = [ ]
+            for query in self.queries:
+                sorted_result.append(result[to_idx[query]])
+            if sorted_result[0] <= 0.0:
+                raise Exception("Contradictory evidence! Probablity given evidence is zero.")
+            final_results = [ value/sorted_result[0] for value in sorted_result[1:] ] 
+        elif strategy == 'pysdd':
+            # perform bottom up compilation using pysdd
+            pass
+        self.queries = []
+        return final_results
+
+
+
+
+
