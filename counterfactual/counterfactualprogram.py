@@ -6,8 +6,21 @@ Program module providing the algebraic progam class.
 
 import logging
 
+
+import tempfile
+import os 
+
+import networkx as nx
+
+import numpy as np
+from ctypes import *
+from array import array
+
 from aspmc.programs.program import Rule
 
+import aspmc.graph.treedecomposition as treedecomposition
+from aspmc.compile.vtree import TD_to_vtree
+from pysdd.sdd import SddManager, Vtree, WmcManager
 
 from aspmc.config import config
 from aspmc.util import *
@@ -159,21 +172,24 @@ class CounterfactualProgram(ProblogProgram):
                 atom = self.intervention_atoms[name]
                 tmp_program.append(Rule([ atom ], []))
 
-        for name, phase in evidence.items():
-            atom = self.evidence_atoms[name]
-            if phase:
-                body = [ atom ]
-            else:
-                body = [ -atom ]
-            tmp_program.append(Rule([],body))
-
-        self.queries = [ "true" ]
-        self.queries += [ self._external_name(self.intervention_atoms[name]) for name in queries ]
-        program_string = self._prog_string(tmp_program)
-        inference_program = ProblogProgram(program_string, [])
+        
         
         # evaluate the query using the given strategy
         if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
+            # finalize the program with the evidence and the queries
+            for name, phase in evidence.items():
+                atom = self.evidence_atoms[name]
+                if phase:
+                    body = [ atom ]
+                else:
+                    body = [ -atom ]
+                tmp_program.append(Rule([],body))
+
+            self.queries = [ "true" ]
+            self.queries += [ self._external_name(self.intervention_atoms[name]) for name in queries ]
+            program_string = self._prog_string(tmp_program)
+            # create a new probabilistic program for inference
+            inference_program = ProblogProgram(program_string, [])
             # perform CNF conversion, followed by top down knowledge compilation
             inference_program.tpUnfold()
             inference_program.td_guided_both_clark_completion(adaptive = False, latest = True)
@@ -190,11 +206,120 @@ class CounterfactualProgram(ProblogProgram):
             final_results = [ value/sorted_result[0] for value in sorted_result[1:] ] 
         elif strategy == 'pysdd':
             # perform bottom up compilation using pysdd
-            pass
+            sdd = self.setup_sdd_manager(tmp_program)
+            vars = list(sdd.vars)
+            # set up the and/or graph
+            graph = nx.DiGraph()
+            for r in tmp_program:
+                if len(r.body) > 0:
+                    for atom in r.head:
+                        graph.add_edge(r, atom)
+                    for atom in r.body:
+                        graph.add_edge(abs(atom), r)
+            guesses = list(self._guess)
+            vertex_to_sdd = { v : vars[i] for i,v in enumerate(guesses) }
+            # TODO: reduce to relevant part by using only the ancestors of evidence and or queries
+            ts = nx.topological_sort(graph)
+            for cur in ts:
+                if isinstance(cur, Rule):
+                    new_sdd = sdd.true()
+                    for b in cur.body:
+                        if b < 0:
+                            vertex_to_sdd[b] = ~vertex_to_sdd[-b]
+                        new_sdd = new_sdd & vertex_to_sdd[b]
+                    vertex_to_sdd[cur] = new_sdd
+                elif cur not in self._guess:
+                    ins = list(graph.in_edges(nbunch=cur))
+                    new_sdd = sdd.false()
+                    for r in ins:
+                        new_sdd = new_sdd | vertex_to_sdd[r[0]]
+                    vertex_to_sdd[cur] = new_sdd
+            
+            # conjoin all the evidence atoms
+            conjoined_evidence = sdd.true()
+            for name, phase in evidence.items():
+                if phase:
+                    conjoined_evidence = conjoined_evidence & ~vertex_to_sdd[self.evidence_atoms[name]]
+                else:
+                    conjoined_evidence = conjoined_evidence & vertex_to_sdd[self.evidence_atoms[name]]
+
+            # get all the query sdds and conjoin them with the evidence
+            query_sdds = [ vertex_to_sdd[self.intervention_atoms[query]] for query in queries ]
+            query_sdds = [ query_sdd & conjoined_evidence for query_sdd in query_sdds ]
+
+            # compute the actual probabilities
+            # first the probability of the evidence
+            evidence_manager = WmcManager(conjoined_evidence, log_mode = False)
+            weights = [ 1.0 for _ in range(2*len(self._guess)) ]
+            varMap = { name : var for var, name in self._nameMap.items() }
+            rev_mapping = { guesses[i] : i + 1 for i in range(len(self._guess)) }
+            for name in self.weights:
+                sdd_var = rev_mapping[varMap[name]]
+                weights[len(self._guess) + sdd_var - 1] = self.weights[name]
+                weights[len(self._guess) - sdd_var] = 1 - self.weights[name]
+            python_array = np.array(weights)
+            c_weights = array('d', python_array.astype('float'))
+            evidence_manager.set_literal_weights_from_array(c_weights)
+            evidence_weight = evidence_manager.propagate()
+            if evidence_weight <= 0.0:
+                raise Exception("Contradictory evidence! Probablity given evidence is zero.")
+            
+            # then the probabilities of the queries given the evidence
+            final_results = []
+            for query_sdd in query_sdds:
+                query_manager = WmcManager(query_sdd, log_mode = False)
+                query_manager.set_literal_weights_from_array(c_weights)
+                query_weight = query_manager.propagate()
+                final_results.append(query_weight/evidence_weight)
+
         self.queries = []
         return final_results
 
+    def setup_sdd_manager(self, program):
+        # first generate a vtree for the program that is probably good
+        OR = 0
+        AND = 1
+        GUESS = 3
+        INPUT = 4
+        # approximate final width when using none strategy
+        nodes = { a : (OR, set()) for a in self._deriv }
 
+        cur_max = self._max
+        for a in self._exactlyOneOf:
+            cur_max += 1
+            nodes[cur_max] = (GUESS, set(abs(v) for v in a))
+
+        for atom in self._guess:
+            nodes[atom] = (INPUT, set())
+
+        for r in program:
+            cur_max += 1
+            nodes[cur_max] = (AND, set(abs(v) for v in r.body))
+            if len(r.head) != 0:
+                nodes[abs(r.head[0])][1].add(cur_max)
+
+        # set up the and/or graph
+        graph = nx.Graph()
+        for a, inputs in nodes.items():
+            graph.add_edges_from([ (a, v) for v in inputs[1] ])
+            
+        td = treedecomposition.from_graph(graph, solver = config["decos"], timeout = str(float(config["decot"])))
+        td.remove(set(range(1, cur_max + 1)).difference(self._guess))
+        my_vtree = TD_to_vtree(td)
+        guesses = list(self._guess)
+        rev_mapping = { guesses[i] : i + 1 for i in range(len(self._guess)) }
+        for node in my_vtree:
+            if node.val != None:
+                assert(node.val in self._guess)
+                node.val = rev_mapping[node.val]
+
+        (_, vtree_tmp) = tempfile.mkstemp()
+        my_vtree.write(vtree_tmp)
+        vtree = Vtree(filename=vtree_tmp)
+        os.remove(vtree_tmp)
+        sdd = SddManager.from_vtree(vtree)
+        
+        return sdd
 
 
 
