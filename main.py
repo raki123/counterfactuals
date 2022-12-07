@@ -164,10 +164,16 @@ def main():
    
     program = CounterfactualProgram(program_str, program_files)
 
-    result = program.single_query(interventions, evidence, queries, strategy=config.config["knowledge_compiler"])
-    print(result)
-    result = program.multi_query(interventions, evidence, queries, strategy=config.config["knowledge_compiler"])
-    print(result)
+    results = program.single_query(interventions, evidence, queries, strategy=config.config["knowledge_compiler"])
+    
+    # print the results
+    logger.info("   Results")
+    logger.info("------------------------------------------------------------")
+
+    if len(queries) > 0:
+        for i,query in enumerate(queries):
+            logger.result(f"{query}: {' '*max(1,(20 - len(query)))}{results[i]}")
+
 if __name__ == "__main__":
     main()
 

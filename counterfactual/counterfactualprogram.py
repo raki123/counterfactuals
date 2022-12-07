@@ -19,12 +19,18 @@ from array import array
 from aspmc.programs.program import Rule
 
 import aspmc.graph.treedecomposition as treedecomposition
-from aspmc.compile.vtree import TD_to_vtree
+from aspmc.compile.vtree import TD_to_vtree, TD_vtree
+from aspmc.compile.dtree import TD_dtree
 from pysdd.sdd import SddManager, Vtree, WmcManager
+from aspmc.compile.cnf import CNF
+from aspmc.compile.circuit import Circuit
 
 from aspmc.config import config
 from aspmc.util import *
 from aspmc.programs.naming import *
+
+
+import aspmc.signal_handling as my_signals
 
 logger = logging.getLogger("CFInfer")
 
@@ -73,9 +79,14 @@ class CounterfactualProgram(ProblogProgram):
             logger.warning("Queries should not be included in counterfactual programs. I will ignore them.")
             self.queries = []
         
+        # attributes for the bottom up multi-query case
         self._sdd_manager = None
         self._topological_ordering = None
         self._applyCache = {}
+        # attributes for the top down multi-query case
+        self._nnf = None
+        self._intervention_conditioners = {}
+        self._vtree = None
 
         # duplicate the program such that we obtain an evidence part and a part for the intervention
         self.evidence_atoms = {}
@@ -297,7 +308,7 @@ class CounterfactualProgram(ProblogProgram):
         self.queries = []
         return final_results
 
-    def _setup_multiquery(self):
+    def _setup_multiquery_bottom_up(self):
         graph = nx.DiGraph()
         for r in self._program:
             if len(r.body) > 0:
@@ -309,6 +320,67 @@ class CounterfactualProgram(ProblogProgram):
         self._topological_ordering = list(nx.topological_sort(graph))
         self._sdd_manager = self.setup_sdd_manager(self._program)
 
+    def _setup_multiquery_top_down(self, strategy = "sharpsat-td"):
+        # create the atoms to condition on for interventions
+        for original_name, atom in self.intervention_atoms.items():
+            pos_var = self._new_var(f"do({original_name})")
+            neg_var = self._new_var(f"dont({original_name})")
+            self._intervention_conditioners[atom] = (pos_var, neg_var)
+            self._guess.add(pos_var)
+            self._guess.add(neg_var)
+            self.weights[f"do({original_name})"] = 0.0
+            self.weights[f"dont({original_name})"] = 0.0
+
+        # change the rules
+        interventions = set(self.intervention_atoms.values())
+        
+        for rule in self._program:
+            if len(rule.head) > 0:
+                if rule.head[0] in interventions:
+                    rule.body.append(-self._intervention_conditioners[rule.head[0]][1])
+        
+        # TODO: see what happens if we put this be for the other rule changes
+        for atom in interventions:
+            self._program.append(Rule([ atom ], [ self._intervention_conditioners[atom][0] ]))
+
+        self.td_guided_both_clark_completion(adaptive=False, latest=True)
+        cnf_fd, cnf_tmp = tempfile.mkstemp()
+        my_signals.tempfiles.add(cnf_tmp)
+        
+        # prepare everything for the compilation
+        if strategy == "c2d":
+            with os.fdopen(cnf_fd, 'wb') as cnf_file:
+                self._cnf.to_stream(cnf_file)
+            d3 = TD_dtree(self._cnf, solver = config["decos"], timeout = config["decot"])
+            d3.write(cnf_tmp + '.dtree')
+            my_signals.tempfiles.add(cnf_tmp + '.dtree')
+        elif strategy == "miniC2D":            
+            with os.fdopen(cnf_fd, 'wb') as cnf_file:
+                self._cnf.to_stream(cnf_file)
+            self._vtree = TD_vtree(self._cnf, solver = config["decos"], timeout = config["decot"])
+            self._vtree.write(cnf_tmp + ".vtree")
+            my_signals.tempfiles.add(cnf_tmp + '.vtree')
+        elif strategy == "sharpsat-td":
+            with os.fdopen(cnf_fd, 'wb') as cnf_file:
+                self._cnf.write_kc_cnf(cnf_file)
+        elif strategy == "d4":
+            with os.fdopen(cnf_fd, 'wb') as cnf_file:
+                self._cnf.to_stream(cnf_file)
+                
+        # perform the actual compilation
+        CNF.compile_single(cnf_tmp, knowledge_compiler = strategy)
+        
+        # remove the temporary files
+        os.remove(cnf_tmp)
+        my_signals.tempfiles.remove(cnf_tmp)
+        self._nnf = cnf_tmp + ".nnf"
+        if strategy == "c2d":
+            os.remove(cnf_tmp + ".dtree")
+            my_signals.tempfiles.remove(cnf_tmp + '.dtree')
+        elif strategy == "miniC2D":
+            os.remove(cnf_tmp + ".vtree")
+            my_signals.tempfiles.remove(cnf_tmp + '.vtree')
+        
     def _cached_apply(self, node1, node2, operation):
         if not (node1, node2, operation) in self._applyCache:
             if operation == SDDOperation.AND:
@@ -340,8 +412,106 @@ class CounterfactualProgram(ProblogProgram):
         Returns:
             list: A list containing the results of the counterfactual queries in the order they were given in `queries`.
         """
+        if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
+            return self._multi_query_top_down(interventions, evidence, queries, strategy=strategy)
+        elif strategy == "pysdd":
+            return self._multi_query_bottom_up(interventions, evidence, queries, strategy=strategy)
+        else:
+            raise Exception(f"Unknown compilation strategy {strategy}.")
+
+    def _multi_query_top_down(self, interventions, evidence, queries, strategy="sharpsat-td"):
+        """Evaluates one of many single counterfactual queries using the given strategy.
+
+        Args:
+            interventions (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` should be intervened positively (phase == False) or negatively.
+            evidence (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` must have been true (phase == False) or false.
+            queries (list): A list of strings, indicating that we want to query the probabilities of the atoms
+                under the given interventions and evidence.
+            strategy (:obj:`string`, optional): The knowledge compiler to use. Possible values are 
+                * `c2d` for top down compilation to sd-DNNF with c2d,
+                * `miniC2D` for top down compilation to sd-DNNF with miniC2D,
+                * `d4` for top down compilation to sd-DNNF with d4,
+                * `sharpsat-td` for top down compilation to sd-DNNF with sharpsat-td.
+                Defaults to `sharpsat-td`.
+        Returns:
+            list: A list containing the results of the counterfactual queries in the order they were given in `queries`.
+        """
+        if self._nnf is None:
+            self._setup_multiquery_top_down(strategy=strategy)
+
+        # prepare the weights for this query
+        actual_queries = [ "true" ] + [ self._external_name(self.intervention_atoms[query]) for query in queries ]
+        query_cnt = len(actual_queries)
+        varMap = { name : var for var, name in self._nameMap.items() }
+        weight_list = [ np.full(query_cnt, self.semiring.one(), dtype=self.semiring.dtype) for _ in range(self._max*2) ]
+        for name in self.weights:
+            weight_list[to_pos(varMap[name])] = np.full(query_cnt, self.weights[name], dtype=self.semiring.dtype)
+            weight_list[neg(to_pos(varMap[name]))] = np.full(query_cnt, self.semiring.negate(self.weights[name]), dtype=self.semiring.dtype)
+        for i, query in enumerate(actual_queries):
+            weight_list[neg(to_pos(varMap[query]))][i] = self.semiring.zero()
+        
+        for name, phase in interventions.items():
+            intervention_atom = self.intervention_atoms[name]
+            if phase:
+                conditioner_atom = self._intervention_conditioners[intervention_atom][1]
+            else:
+                conditioner_atom = self._intervention_conditioners[intervention_atom][0]
+            weight_list[to_pos(conditioner_atom)] = np.full(query_cnt, 1.0, dtype=self.semiring.dtype)
+            weight_list[neg(to_pos(conditioner_atom))] = np.full(query_cnt, 0.0, dtype=self.semiring.dtype)
+
+        for name, phase in evidence.items():
+            evidence_atom = self.evidence_atoms[name]
+            if phase:
+                weight_list[to_pos(evidence_atom)] = np.full(query_cnt, 0.0, dtype=self.semiring.dtype)
+            else:
+                weight_list[neg(to_pos(evidence_atom))] = np.full(query_cnt, 0.0, dtype=self.semiring.dtype)
+
+        for v in range(self._max*2):
+            self._cnf.weights[to_dimacs(v)] = weight_list[v]
+        self._cnf.semirings = [ self.semiring ]
+        self._cnf.quantified = [ list(range(1, self._max + 1)) ]
+
+        # perform the counting on the circuit
+        weights, zero, one, dtype = self._cnf.get_weights()
+        results = Circuit.parse_wmc(self._nnf, weights, zero = zero, one = one, dtype = dtype, solver = strategy, vtree = self._vtree)
+        
+        if results[0] <= 0.0:
+            raise Exception("Contradictory evidence! Probablity given evidence is zero.")
+        
+        final_results = [ result/results[0] for result in results[1:] ]
+        return final_results
+        
+
+
+
+
+    def _multi_query_bottom_up(self, interventions, evidence, queries, strategy="pysdd"):
+        """Evaluates one of many single counterfactual queries using the given strategy.
+
+        Args:
+            interventions (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` should be intervened positively (phase == False) or negatively.
+            evidence (dict): A dictionary mapping names to phases, 
+                indicating that the atom with name `name` must have been true (phase == False) or false.
+            queries (list): A list of strings, indicating that we want to query the probabilities of the atoms
+                under the given interventions and evidence.
+            strategy (:obj:`string`, optional): The knowledge compiler to use. Possible values are 
+                * `pysdd` for bottom up compilation to SDDs,
+                Defaults to `pysdd`.
+        Returns:
+            list: A list containing the results of the counterfactual queries in the order they were given in `queries`.
+        """
+        # check if setup already happened, if not do it now
         if self._sdd_manager is None:
-            self._setup_multiquery()
+            self._setup_multiquery_bottom_up()
+
+        # perform the interventions 
+        # differently from the single query case we do not remove atoms that are intervened on
+        # but only the rules that derive them
+        # this is to enable the use of the same topological ordering for different queries
+        # but should not decrease performance, since the intervened atoms are always either true or false
         tmp_program = [ ]
         atom_interventions = { self.intervention_atoms[name] : phase for name, phase in interventions.items() }
         for rule in self._program:
@@ -357,6 +527,7 @@ class CounterfactualProgram(ProblogProgram):
             if take:
                 tmp_program.append(rule)
 
+        # additional rules to ensure that atoms positively intervened upon are derived
         intervention_rules = []
         for name, phase in interventions.items():
             if not phase:
@@ -365,95 +536,89 @@ class CounterfactualProgram(ProblogProgram):
                 tmp_program.append(intervention_rule)
                 intervention_rules.append(intervention_rule)
 
+        # perform bottom up compilation using pysdd
+        vars = list(self._sdd_manager.vars)
+        guesses = list(self._guess)
+        vertex_to_sdd = { v : vars[i] for i,v in enumerate(guesses) }
+
+        # set up the and/or graph
+        graph = nx.DiGraph()
+        for r in tmp_program:
+            if len(r.body) > 0:
+                for atom in r.head:
+                    graph.add_edge(r, atom)
+                for atom in r.body:
+                    graph.add_edge(abs(atom), r)
         
+        # reduce to relevant part by using only the ancestors of evidence and or queries
+        relevant = set()
+        for query in queries:
+            relevant.add(self.intervention_atoms[query])
+            relevant.update(nx.ancestors(graph, self.intervention_atoms[query]))
+        for atom in evidence:
+            relevant.add(self.evidence_atoms[atom])
+            relevant.update(nx.ancestors(graph, self.evidence_atoms[atom]))
+
+        graph = nx.subgraph(graph, relevant)
+
+        # build the relevant sdds by traversing the graph in topological order
+        # for better reuse we always take the same topological order 
+        # however, we need to make sure that we only have things in there that are relevant
+        # additionally, we now have new rules for the atoms that were intervened on
+        ts = intervention_rules + [ v for v in self._topological_ordering if v in relevant ]
+        for cur in ts:
+            if isinstance(cur, Rule):
+                new_sdd = self._sdd_manager.true()
+                for b in cur.body:
+                    if b < 0:
+                        vertex_to_sdd[b] = self._cached_apply(vertex_to_sdd[-b], None, SDDOperation.NEGATE)
+                    new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[b], SDDOperation.AND)
+                vertex_to_sdd[cur] = new_sdd
+            elif cur not in self._guess:
+                ins = list(graph.in_edges(nbunch=cur))
+                new_sdd = self._sdd_manager.false()
+                for r in ins:
+                    new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[r[0]], SDDOperation.OR)
+                vertex_to_sdd[cur] = new_sdd
         
-        # evaluate the query using the given strategy
-        if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
-            raise Exception("Not currently implemented. Use multiple single queries for top down KC.")
-        elif strategy == 'pysdd':
-            # perform bottom up compilation using pysdd
-            vars = list(self._sdd_manager.vars)
-            guesses = list(self._guess)
-            vertex_to_sdd = { v : vars[i] for i,v in enumerate(guesses) }
-            # set up the and/or graph
-            graph = nx.DiGraph()
-            for r in tmp_program:
-                if len(r.body) > 0:
-                    for atom in r.head:
-                        graph.add_edge(r, atom)
-                    for atom in r.body:
-                        graph.add_edge(abs(atom), r)
-            
-            # reduce to relevant part by using only the ancestors of evidence and or queries
-            relevant = set()
-            for query in queries:
-                relevant.add(self.intervention_atoms[query])
-                relevant.update(nx.ancestors(graph, self.intervention_atoms[query]))
-            for atom in evidence:
-                relevant.add(self.evidence_atoms[atom])
-                relevant.update(nx.ancestors(graph, self.evidence_atoms[atom]))
+        # conjoin all the evidence atoms
+        conjoined_evidence = self._sdd_manager.true()
+        for name, phase in evidence.items():
+            if phase:
+                evidence_atom = self._cached_apply(vertex_to_sdd[self.evidence_atoms[name]], None, SDDOperation.NEGATE)
+            else:
+                evidence_atom = vertex_to_sdd[self.evidence_atoms[name]]
+            conjoined_evidence = self._cached_apply(conjoined_evidence, evidence_atom, SDDOperation.AND)
 
-            graph = nx.subgraph(graph, relevant)
+        # get all the query sdds and conjoin them with the evidence
+        query_sdds = [ vertex_to_sdd[self.intervention_atoms[query]] for query in queries ]
+        query_sdds = [ self._cached_apply(query_sdd, conjoined_evidence, SDDOperation.AND) for query_sdd in query_sdds ]
 
-            # build the relevant sdds by traversing the graph in topological order
-            # for better reuse we always take the same topological order 
-            # however, we need to make sure that we only have things in there that are relevant
-            # additionally, we now have new rules for the atoms that were intervened on
-            ts = intervention_rules + [ v for v in self._topological_ordering if v in relevant ]
-            for cur in ts:
-                if isinstance(cur, Rule):
-                    new_sdd = self._sdd_manager.true()
-                    for b in cur.body:
-                        if b < 0:
-                            vertex_to_sdd[b] = self._cached_apply(vertex_to_sdd[-b], None, SDDOperation.NEGATE)
-                        new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[b], SDDOperation.AND)
-                    vertex_to_sdd[cur] = new_sdd
-                elif cur not in self._guess:
-                    ins = list(graph.in_edges(nbunch=cur))
-                    new_sdd = self._sdd_manager.false()
-                    for r in ins:
-                        new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[r[0]], SDDOperation.OR)
-                    vertex_to_sdd[cur] = new_sdd
-            
-            # conjoin all the evidence atoms
-            conjoined_evidence = self._sdd_manager.true()
-            for name, phase in evidence.items():
-                if phase:
-                    evidence_atom = self._cached_apply(vertex_to_sdd[self.evidence_atoms[name]], None, SDDOperation.NEGATE)
-                else:
-                    evidence_atom = vertex_to_sdd[self.evidence_atoms[name]]
-                conjoined_evidence = self._cached_apply(conjoined_evidence, evidence_atom, SDDOperation.AND)
+        # compute the actual probabilities
+        # first the probability of the evidence
+        evidence_manager = WmcManager(conjoined_evidence, log_mode = False)
+        weights = [ 1.0 for _ in range(2*len(self._guess)) ]
+        varMap = { name : var for var, name in self._nameMap.items() }
+        rev_mapping = { guesses[i] : i + 1 for i in range(len(self._guess)) }
+        for name in self.weights:
+            sdd_var = rev_mapping[varMap[name]]
+            weights[len(self._guess) + sdd_var - 1] = self.weights[name]
+            weights[len(self._guess) - sdd_var] = 1 - self.weights[name]
+        python_array = np.array(weights)
+        c_weights = array('d', python_array.astype('float'))
+        evidence_manager.set_literal_weights_from_array(c_weights)
+        evidence_weight = evidence_manager.propagate()
+        if evidence_weight <= 0.0:
+            raise Exception("Contradictory evidence! Probablity given evidence is zero.")
+        
+        # then the probabilities of the queries given the evidence
+        final_results = []
+        for query_sdd in query_sdds:
+            query_manager = WmcManager(query_sdd, log_mode = False)
+            query_manager.set_literal_weights_from_array(c_weights)
+            query_weight = query_manager.propagate()
+            final_results.append(query_weight/evidence_weight)
 
-            # get all the query sdds and conjoin them with the evidence
-            query_sdds = [ vertex_to_sdd[self.intervention_atoms[query]] for query in queries ]
-            query_sdds = [ self._cached_apply(query_sdd, conjoined_evidence, SDDOperation.AND) for query_sdd in query_sdds ]
-
-            # compute the actual probabilities
-            # first the probability of the evidence
-            evidence_manager = WmcManager(conjoined_evidence, log_mode = False)
-            weights = [ 1.0 for _ in range(2*len(self._guess)) ]
-            varMap = { name : var for var, name in self._nameMap.items() }
-            rev_mapping = { guesses[i] : i + 1 for i in range(len(self._guess)) }
-            for name in self.weights:
-                sdd_var = rev_mapping[varMap[name]]
-                weights[len(self._guess) + sdd_var - 1] = self.weights[name]
-                weights[len(self._guess) - sdd_var] = 1 - self.weights[name]
-            python_array = np.array(weights)
-            c_weights = array('d', python_array.astype('float'))
-            evidence_manager.set_literal_weights_from_array(c_weights)
-            evidence_weight = evidence_manager.propagate()
-            if evidence_weight <= 0.0:
-                raise Exception("Contradictory evidence! Probablity given evidence is zero.")
-            
-            # then the probabilities of the queries given the evidence
-            final_results = []
-            for query_sdd in query_sdds:
-                query_manager = WmcManager(query_sdd, log_mode = False)
-                query_manager.set_literal_weights_from_array(c_weights)
-                query_weight = query_manager.propagate()
-                final_results.append(query_weight/evidence_weight)
-
-        self.queries = []
         return final_results
 
     def setup_sdd_manager(self, program):
