@@ -1,0 +1,11 @@
+* write a help description for the solver
+* add setup information (requirements.txt etc.)
+* add a license
+* add a readme
+* add unittests
+* make it a pip package
+
+
+maybe:
+* enable multi-query inference by keeping stdin open and reading from there
+* check if the multi-query idea for the top down version is a good idea in the bottom up case
