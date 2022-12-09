@@ -76,7 +76,7 @@ class CounterfactualProgram(ProblogProgram):
         # initialize the superclass
         ProblogProgram.__init__(self, program_str, program_files)
         if len(self.queries) > 0:
-            logger.warning("Queries should not be included in counterfactual programs. I will ignore them.")
+            logger.warning("Queries should not be included in the program specification. I will ignore them.")
             self.queries = []
         
         # attributes for the bottom up multi-query case
