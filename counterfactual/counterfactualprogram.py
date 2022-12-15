@@ -194,7 +194,6 @@ class CounterfactualProgram(ProblogProgram):
                 tmp_program.append(Rule([ atom ], []))
 
         
-        
         # evaluate the query using the given strategy
         if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
             # finalize the program with the evidence and the queries
@@ -214,7 +213,7 @@ class CounterfactualProgram(ProblogProgram):
             # perform CNF conversion, followed by top down knowledge compilation
             inference_program.td_guided_both_clark_completion(adaptive = False, latest = True)
             cnf = inference_program.get_cnf()
-            result = cnf.evaluate()
+            result = cnf.evaluate(strategy="compilation")
             # reorder the query results
             other_queries = inference_program.get_queries()
             to_idx = { query : idx for idx, query in enumerate(other_queries) }
@@ -235,11 +234,10 @@ class CounterfactualProgram(ProblogProgram):
             # set up the and/or graph
             graph = nx.DiGraph()
             for r in tmp_program:
-                if len(r.body) > 0:
-                    for atom in r.head:
-                        graph.add_edge(r, atom)
-                    for atom in r.body:
-                        graph.add_edge(abs(atom), r)
+                for atom in r.head:
+                    graph.add_edge(r, atom)
+                for atom in r.body:
+                    graph.add_edge(abs(atom), r)
             # reduce to relevant part by using only the ancestors of evidence and or queries
             relevant = set()
             for query in queries:
@@ -248,8 +246,6 @@ class CounterfactualProgram(ProblogProgram):
             for atom in evidence:
                 relevant.add(self.evidence_atoms[atom])
                 relevant.update(nx.ancestors(graph, self.evidence_atoms[atom]))
-
-            graph = nx.subgraph(graph, relevant)
 
             # build the relevant sdds by traversing the graph in topological order
             ts = nx.topological_sort(graph)
@@ -311,11 +307,10 @@ class CounterfactualProgram(ProblogProgram):
     def _setup_multiquery_bottom_up(self):
         graph = nx.DiGraph()
         for r in self._program:
-            if len(r.body) > 0:
-                for atom in r.head:
-                    graph.add_edge(r, atom)
-                for atom in r.body:
-                    graph.add_edge(abs(atom), r)
+            for atom in r.head:
+                graph.add_edge(r, atom)
+            for atom in r.body:
+                graph.add_edge(abs(atom), r)
         
         self._topological_ordering = list(nx.topological_sort(graph))
         self._sdd_manager = self.setup_sdd_manager(self._program)
@@ -544,11 +539,10 @@ class CounterfactualProgram(ProblogProgram):
         # set up the and/or graph
         graph = nx.DiGraph()
         for r in tmp_program:
-            if len(r.body) > 0:
-                for atom in r.head:
-                    graph.add_edge(r, atom)
-                for atom in r.body:
-                    graph.add_edge(abs(atom), r)
+            for atom in r.head:
+                graph.add_edge(r, atom)
+            for atom in r.body:
+                graph.add_edge(abs(atom), r)
         
         # reduce to relevant part by using only the ancestors of evidence and or queries
         relevant = set()
