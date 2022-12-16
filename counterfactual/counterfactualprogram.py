@@ -196,6 +196,27 @@ class CounterfactualProgram(ProblogProgram):
         
         # evaluate the query using the given strategy
         if strategy in ['c2d', 'miniC2D', 'd4', 'sharpsat-td']:
+            # reduce the program to the relevant part
+            # set up the and/or graph
+            graph = nx.DiGraph()
+            for r in tmp_program:
+                for atom in r.head:
+                    graph.add_edge(r, atom)
+                for atom in r.body:
+                    graph.add_edge(abs(atom), r)
+                    
+            # reduce to relevant part by using only the ancestors of evidence and or queries
+            relevant = set()
+            for query in queries:
+                relevant.add(self.intervention_atoms[query])
+                relevant.update(nx.ancestors(graph, self.intervention_atoms[query]))
+            for atom in evidence:
+                relevant.add(self.evidence_atoms[atom])
+                relevant.update(nx.ancestors(graph, self.evidence_atoms[atom]))
+
+            tmp_program = [ r for r in tmp_program if r in relevant ]
+            tmp_program.append(Rule([self.true], []))
+
             # finalize the program with the evidence and the queries
             for name, phase in evidence.items():
                 atom = self.evidence_atoms[name]
@@ -213,7 +234,7 @@ class CounterfactualProgram(ProblogProgram):
             # perform CNF conversion, followed by top down knowledge compilation
             inference_program.td_guided_both_clark_completion(adaptive = False, latest = True)
             cnf = inference_program.get_cnf()
-            result = cnf.evaluate(strategy="compilation")
+            result = cnf.evaluate(strategy = "compilation")
             # reorder the query results
             other_queries = inference_program.get_queries()
             to_idx = { query : idx for idx, query in enumerate(other_queries) }
@@ -238,6 +259,7 @@ class CounterfactualProgram(ProblogProgram):
                     graph.add_edge(r, atom)
                 for atom in r.body:
                     graph.add_edge(abs(atom), r)
+
             # reduce to relevant part by using only the ancestors of evidence and or queries
             relevant = set()
             for query in queries:
