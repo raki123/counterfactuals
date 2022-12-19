@@ -1,0 +1,572 @@
+<result>
+	<machine name="cobra" cpu="8xE5520@2.27GHz" memory="8GB"/>
+	<config name="condor-generic" template="templates/condor/runsolver_template_CFInfer_multi.py"/>
+	<system name="perform_multi" version="0.1" measures="CFInfer_multi" config="condor-generic">
+		<setting name="sharpsat" cmdline="" tag=""/>
+		<setting name="pysdd" cmdline="-k pysdd" tag=""/>
+	</system>
+	<pbsjob name="condor-generic" timeout="3200" runs="1" script_mode="timeout" walltime="86399" basedir="/mnt/vg01/lv01/home/rkiesel/benchmark-tool/" condortemplate="templates/condor/condor.submit"/>
+	<benchmark name="cf_transit">
+		<class name="." id="0">
+			<instance name="0" id="0"/>
+			<instance name="1" id="1"/>
+			<instance name="2" id="2"/>
+			<instance name="3" id="3"/>
+			<instance name="4" id="4"/>
+			<instance name="5" id="5"/>
+			<instance name="6" id="6"/>
+			<instance name="7" id="7"/>
+			<instance name="8" id="8"/>
+		</class>
+	</benchmark>
+	<project name="CFInfer_multi" job="condor-generic">
+		<runspec machine="cobra" system="perform_multi" version="0.1" benchmark="cf_transit" setting="sharpsat">
+			<class id="0">
+				<instance id="1">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3197.16136765"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./1/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="1"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="9376.9"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="67"/>
+						<measure name="wall" type="float" val="3202.03"/>
+					</run>
+				</instance>
+				<instance id="0">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3198.18883538"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./0/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="0"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="9525.82"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="60"/>
+						<measure name="wall" type="float" val="3202.05"/>
+					</run>
+				</instance>
+				<instance id="3">
+					<run number="1">
+						<measure name="#models" type="long" val="7314317226409912"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3196.28776503"/>
+						<measure name="exec_time_1" type="float" val="1.73143172264"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./3/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="3"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="10042.84"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="64"/>
+						<measure name="wall" type="float" val="3202.03"/>
+					</run>
+				</instance>
+				<instance id="2">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3196.28745198"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./2/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="2"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="10869.15"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="80"/>
+						<measure name="wall" type="float" val="3202.03"/>
+					</run>
+				</instance>
+				<instance id="5">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3197.19468236"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./5/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="5"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="9469.53"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="77"/>
+						<measure name="wall" type="float" val="3202.02"/>
+					</run>
+				</instance>
+				<instance id="4">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3197.86666107"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./4/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="4"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="10447.05"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="67"/>
+						<measure name="wall" type="float" val="3202.03"/>
+					</run>
+				</instance>
+				<instance id="7">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3197.52234507"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./7/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="7"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="5369.55"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="75"/>
+						<measure name="wall" type="float" val="3202.05"/>
+					</run>
+				</instance>
+				<instance id="6">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3198.09273148"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./6/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="6"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="10609.01"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="64"/>
+						<measure name="wall" type="float" val="3202.05"/>
+					</run>
+				</instance>
+				<instance id="8">
+					<run number="1">
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="3197.00231171"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-sharpsat/./8/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="8"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="11648.25"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="sharpsat"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val=""/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="tree_width_unfolded" type="long" val="75"/>
+						<measure name="wall" type="float" val="3202.06"/>
+					</run>
+				</instance>
+			</class>
+		</runspec>
+		<runspec machine="cobra" system="perform_multi" version="0.1" benchmark="cf_transit" setting="pysdd">
+			<class id="0">
+				<instance id="1">
+					<run number="1">
+						<measure name="#models" type="long" val="020250496"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="26.0572063923"/>
+						<measure name="exec_time_1" type="float" val="10.7137129307"/>
+						<measure name="exec_time_2" type="float" val="18.2155110836"/>
+						<measure name="exec_time_3" type="float" val="31.5212540627"/>
+						<measure name="exec_time_4" type="float" val="15.3968112469"/>
+						<measure name="exec_time_5" type="float" val="16.128421545"/>
+						<measure name="exec_time_6" type="float" val="6.15930771828"/>
+						<measure name="exec_time_7" type="float" val="2.60100340843"/>
+						<measure name="exec_time_8" type="float" val="1.97746777534"/>
+						<measure name="exec_time_9" type="float" val="3.56897830963"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./1/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="1"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="2309.37"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="138.433"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="138.433"/>
+					</run>
+				</instance>
+				<instance id="0">
+					<run number="1">
+						<measure name="#models" type="long" val="3850427919999997"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="22.884963274"/>
+						<measure name="exec_time_1" type="float" val="15.0732553005"/>
+						<measure name="exec_time_2" type="float" val="3.66739058495"/>
+						<measure name="exec_time_3" type="float" val="19.348487854"/>
+						<measure name="exec_time_4" type="float" val="9.48481106758"/>
+						<measure name="exec_time_5" type="float" val="11.5660512447"/>
+						<measure name="exec_time_6" type="float" val="15.7806925774"/>
+						<measure name="exec_time_7" type="float" val="2.79208111763"/>
+						<measure name="exec_time_8" type="float" val="3.28503274918"/>
+						<measure name="exec_time_9" type="float" val="12.0173492432"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./0/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="0"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="1494.02"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="124.772"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="124.772"/>
+					</run>
+				</instance>
+				<instance id="3">
+					<run number="1">
+						<measure name="#models" type="long" val="5520233890000004"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="16.6360321045"/>
+						<measure name="exec_time_1" type="float" val="5.39203476906"/>
+						<measure name="exec_time_2" type="float" val="18.4545736313"/>
+						<measure name="exec_time_3" type="float" val="13.7368619442"/>
+						<measure name="exec_time_4" type="float" val="2.28399920464"/>
+						<measure name="exec_time_5" type="float" val="7.8058218956"/>
+						<measure name="exec_time_6" type="float" val="2.79925823212"/>
+						<measure name="exec_time_7" type="float" val="9.51568937302"/>
+						<measure name="exec_time_8" type="float" val="2.00439620018"/>
+						<measure name="exec_time_9" type="float" val="13.3744361401"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./3/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="3"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="1508.01"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="98.8086"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="98.8086"/>
+					</run>
+				</instance>
+				<instance id="2">
+					<run number="1">
+						<measure name="#models" type="long" val="383423294"/>
+						<measure name="error" type="int" val="2"/>
+						<measure name="error_str" type="string" val="std::bad_alloc"/>
+						<measure name="exec_time_0" type="float" val="108.253683567"/>
+						<measure name="exec_time_1" type="float" val="27.9499866962"/>
+						<measure name="exec_time_2" type="float" val="55.8265326023"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./2/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="2"/>
+						<measure name="memerror" type="string" val="exceeded"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="16633.45"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3204"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="wall" type="float" val="582.467"/>
+					</run>
+				</instance>
+				<instance id="5">
+					<run number="1">
+						<measure name="#models" type="long" val="7607494529999999"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="17.1035428047"/>
+						<measure name="exec_time_1" type="float" val="16.9854359627"/>
+						<measure name="exec_time_2" type="float" val="23.0155518055"/>
+						<measure name="exec_time_3" type="float" val="1.59208893776"/>
+						<measure name="exec_time_4" type="float" val="21.8116838932"/>
+						<measure name="exec_time_5" type="float" val="37.6587872505"/>
+						<measure name="exec_time_6" type="float" val="2841.91087461"/>
+						<measure name="exec_time_7" type="float" val="7.09048724174"/>
+						<measure name="exec_time_8" type="float" val="1.61055517197"/>
+						<measure name="exec_time_9" type="float" val="11.1676237583"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./5/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="5"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="7113.55"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3007.09"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="3007.09"/>
+					</run>
+				</instance>
+				<instance id="4">
+					<run number="1">
+						<measure name="#models" type="long" val="0793360939999994"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="18.5261881351"/>
+						<measure name="exec_time_1" type="float" val="12.1179273129"/>
+						<measure name="exec_time_2" type="float" val="42.4494264126"/>
+						<measure name="exec_time_3" type="float" val="72.0582528114"/>
+						<measure name="exec_time_4" type="float" val="32.0577306747"/>
+						<measure name="exec_time_5" type="float" val="3.49878764153"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./4/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="4"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="4491.49"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="int" val="0"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="3200"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="1"/>
+						<measure name="wall" type="float" val="3202.4"/>
+					</run>
+				</instance>
+				<instance id="7">
+					<run number="1">
+						<measure name="#models" type="long" val="8590699699999997"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="53.7446005344"/>
+						<measure name="exec_time_1" type="float" val="14.2761294842"/>
+						<measure name="exec_time_2" type="float" val="6.27610063553"/>
+						<measure name="exec_time_3" type="float" val="18.0145881176"/>
+						<measure name="exec_time_4" type="float" val="47.6627192497"/>
+						<measure name="exec_time_5" type="float" val="18.2534866333"/>
+						<measure name="exec_time_6" type="float" val="32.6763122082"/>
+						<measure name="exec_time_7" type="float" val="23.8468973637"/>
+						<measure name="exec_time_8" type="float" val="57.1160538197"/>
+						<measure name="exec_time_9" type="float" val="39.8740723133"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./7/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="7"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="3561.24"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="330.112"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="330.112"/>
+					</run>
+				</instance>
+				<instance id="6">
+					<run number="1">
+						<measure name="#models" type="long" val="5809034400000002"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="16.3216202259"/>
+						<measure name="exec_time_1" type="float" val="15.0858073235"/>
+						<measure name="exec_time_2" type="float" val="52.8745985031"/>
+						<measure name="exec_time_3" type="float" val="18.068454504"/>
+						<measure name="exec_time_4" type="float" val="15.9363036156"/>
+						<measure name="exec_time_5" type="float" val="23.7060523033"/>
+						<measure name="exec_time_6" type="float" val="13.5619044304"/>
+						<measure name="exec_time_7" type="float" val="3.60582375526"/>
+						<measure name="exec_time_8" type="float" val="3.00988340378"/>
+						<measure name="exec_time_9" type="float" val="2.5831964016"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./6/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="6"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="2899.83"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="176.008"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="176.008"/>
+					</run>
+				</instance>
+				<instance id="8">
+					<run number="1">
+						<measure name="#models" type="long" val="3919238400000005"/>
+						<measure name="error" type="int" val="0"/>
+						<measure name="error_str" type="string" val=""/>
+						<measure name="exec_time_0" type="float" val="95.1162931919"/>
+						<measure name="exec_time_1" type="float" val="9.37510848045"/>
+						<measure name="exec_time_2" type="float" val="16.2129759789"/>
+						<measure name="exec_time_3" type="float" val="84.8988347054"/>
+						<measure name="exec_time_4" type="float" val="108.241374254"/>
+						<measure name="exec_time_5" type="float" val="88.2903196812"/>
+						<measure name="exec_time_6" type="float" val="65.7916400433"/>
+						<measure name="exec_time_7" type="float" val="8.89397144318"/>
+						<measure name="exec_time_8" type="float" val="91.9135606289"/>
+						<measure name="exec_time_9" type="float" val="16.7322261333"/>
+						<measure name="full_call" type="string" val="None"/>
+						<measure name="full_path" type="string" val="output/CFInfer_multi/cobra/results/cf_transit/perform_multi-0.1-pysdd/./8/run1"/>
+						<measure name="hash" type="string" val="None"/>
+						<measure name="instance" type="string" val="8"/>
+						<measure name="memerror" type="string" val="NA"/>
+						<measure name="memlimit" type="int" val="16672"/>
+						<measure name="memusage" type="float" val="5901.77"/>
+						<measure name="run" type="int" val="0"/>
+						<measure name="setting" type="string" val="pysdd"/>
+						<measure name="solved" type="float" val="1"/>
+						<measure name="solver" type="string" val="perform_multi"/>
+						<measure name="solver_args" type="string" val="-k pysdd"/>
+						<measure name="solver_version" type="string" val="0.1"/>
+						<measure name="status" type="string" val="NA"/>
+						<measure name="time" type="float" val="611.069"/>
+						<measure name="timelimit" type="int" val="3200"/>
+						<measure name="timeout" type="float" val="0"/>
+						<measure name="wall" type="float" val="611.069"/>
+					</run>
+				</instance>
+			</class>
+		</runspec>
+	</project>
+</result>
