@@ -32,10 +32,10 @@ for setting in settings:
     instances_per_setting[setting] = []
 
 setting_to_name = {
-    'hard_pysdd' : 'hard_pysdd',
-    'hard_sharpsat' : 'hard_sharpsat',
-    'easy_pysdd' : 'easy_pysdd',
-    'easy_sharpsat' : 'easy_sharpsat',
+    'hard_pysdd' : 'pysdd',
+    'hard_sharpsat' : 'sharpsat',
+    'easy_pysdd' : 'pysdd',
+    'easy_sharpsat' : 'sharpsat',
 }
 
 for spec in root.find('project').findall('runspec'):
@@ -47,7 +47,7 @@ for spec in root.find('project').findall('runspec'):
             instance.name = run.find('.//measure[@name="instance"]').get('val')
             instances_per_setting[instance.setting].append(instance)
 
-if False:
+if True:
     max_solved = 0
     for setting in settings:
         if "hard" in setting:
@@ -69,7 +69,7 @@ if False:
     plt.ylabel(TIME_LABEL, size = LABEL_SIZE)
     plt.xlabel(INSTANCES_LABEL, size = LABEL_SIZE)
     plt.title("Generated Instances", size = LABEL_SIZE)
-    plt.legend(loc="upper right", prop={'size': LABEL_SIZE})
+    plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
     plt.show()
 
@@ -94,7 +94,7 @@ if False:
     plt.ylabel(TIME_LABEL, size = LABEL_SIZE)
     plt.xlabel(INSTANCES_LABEL, size = LABEL_SIZE)
     plt.title("Real Graphs", size = LABEL_SIZE)
-    plt.legend(loc="upper right", prop={'size': LABEL_SIZE})
+    plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
     plt.show()
 
@@ -127,7 +127,7 @@ if False:
     plt.ylabel(TIME_LABEL, size = LABEL_SIZE)
     plt.xlabel(INSTANCES_LABEL, size = LABEL_SIZE)
     plt.title("All Instances", size = LABEL_SIZE)
-    plt.legend(loc="upper right", prop={'size': LABEL_SIZE})
+    plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
     plt.show()
 
@@ -164,8 +164,10 @@ data /= count
 
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
+data_agg_1 /= height
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
+data_agg_2 /= width
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(height + 2, width + 2),
@@ -187,6 +189,8 @@ axes[1][1].set_xticks([])
 axes[1][1].yaxis.tick_right()
 
 im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
+axes[1][0].set_ylabel("size", size = LABEL_SIZE)
+axes[1][0].set_xlabel("width", size = LABEL_SIZE)
 
 axes[0][1].axis('off')
 
@@ -196,7 +200,9 @@ fig.tight_layout()
 
 fig.subplots_adjust(right=0.7)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-fig.colorbar(im, cax=cbar_ax)
+cbar = fig.colorbar(im, cax=cbar_ax)
+cbar.ax.get_yaxis().labelpad = 15
+cbar.ax.set_ylabel("runtime in seconds", rotation=270)
 plt.show()
 
 data = np.zeros((int(np.ceil(len(ks)/modval)), int(np.ceil(len(ns)/modval))))
@@ -212,8 +218,10 @@ data /= count
 
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
+data_agg_1 /= height
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
+data_agg_2 /= width
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
 fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(height + 2, width + 2),
@@ -235,6 +243,8 @@ axes[1][1].set_xticks([])
 axes[1][1].yaxis.tick_right()
 
 im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
+axes[1][0].set_ylabel("size", size = LABEL_SIZE)
+axes[1][0].set_xlabel("width", size = LABEL_SIZE)
 
 axes[0][1].axis('off')
 
@@ -244,5 +254,7 @@ fig.tight_layout()
 
 fig.subplots_adjust(right=0.7)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-fig.colorbar(im, cax=cbar_ax)
+cbar = fig.colorbar(im, cax=cbar_ax)
+cbar.ax.get_yaxis().labelpad = 15
+cbar.ax.set_ylabel("runtime in seconds", rotation=270)
 plt.show()
