@@ -3,7 +3,7 @@ from aspmc.programs.problogprogram import ProblogProgram
 """
 Program module providing the algebraic progam class.
 """
-
+import time
 import logging
 
 
@@ -269,6 +269,7 @@ class CounterfactualProgram(ProblogProgram):
                 relevant.add(self.evidence_atoms[atom])
                 relevant.update(nx.ancestors(graph, self.evidence_atoms[atom]))
 
+            start = time.process_time()
             # build the relevant sdds by traversing the graph in topological order
             ts = nx.topological_sort(graph)
             for cur in ts:
@@ -285,7 +286,10 @@ class CounterfactualProgram(ProblogProgram):
                     for r in ins:
                         new_sdd = new_sdd | vertex_to_sdd[r[0]]
                     vertex_to_sdd[cur] = new_sdd
-            
+
+            logger.info(f"  Time spent building the basic SDDs: {time.process_time() - start}")
+
+            start = time.process_time()
             # conjoin all the evidence atoms
             conjoined_evidence = sdd.true()
             for name, phase in evidence.items():
@@ -297,6 +301,8 @@ class CounterfactualProgram(ProblogProgram):
             # get all the query sdds and conjoin them with the evidence
             query_sdds = [ vertex_to_sdd[self.intervention_atoms[query]] for query in queries ]
             query_sdds = [ query_sdd & conjoined_evidence for query_sdd in query_sdds ]
+
+            logger.info(f"  Time spent conjoining the basic SDDs: {time.process_time() - start}")
 
             # compute the actual probabilities
             # first the probability of the evidence
@@ -336,6 +342,39 @@ class CounterfactualProgram(ProblogProgram):
         
         self._topological_ordering = list(nx.topological_sort(graph))
         self._sdd_manager = self.setup_sdd_manager(self._program)
+
+        # perform bottom up compilation using pysdd
+        vars = list(self._sdd_manager.vars)
+        guesses = list(self._guess)
+        vertex_to_sdd = { v : vars[i] for i,v in enumerate(guesses) }
+
+
+        # build the relevant sdds by traversing the graph in topological order
+        # for better reuse we always take the same topological order 
+        # however, we need to make sure that we only have things in there that are relevant
+        # additionally, we now have new rules for the atoms that were intervened on
+        start = time.process_time()
+        ts = self._topological_ordering
+        for cur in ts:
+            if isinstance(cur, Rule):
+                new_sdd = self._sdd_manager.true()
+                for b in cur.body:
+                    if b < 0:
+                        vertex_to_sdd[b] = self._cached_apply(vertex_to_sdd[-b], None, SDDOperation.NEGATE)
+                    new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[b], SDDOperation.AND)
+                vertex_to_sdd[cur] = new_sdd
+            elif cur not in self._guess:
+                ins = list(graph.in_edges(nbunch=cur))
+                new_sdd = self._sdd_manager.false()
+                for r in ins:
+                    new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[r[0]], SDDOperation.OR)
+                vertex_to_sdd[cur] = new_sdd
+
+        for atom in self.evidence_atoms.values():
+            self._cached_apply(vertex_to_sdd[atom], None, SDDOperation.NEGATE)
+
+        logger.info(f"  Time spent building the basic SDDs in setup: {time.process_time() - start}")
+
 
     def _setup_multiquery_top_down(self, strategy = "sharpsat-td"):
         # create the atoms to condition on for interventions
@@ -581,6 +620,7 @@ class CounterfactualProgram(ProblogProgram):
         # for better reuse we always take the same topological order 
         # however, we need to make sure that we only have things in there that are relevant
         # additionally, we now have new rules for the atoms that were intervened on
+        start = time.process_time()
         ts = intervention_rules + [ v for v in self._topological_ordering if v in relevant ]
         for cur in ts:
             if isinstance(cur, Rule):
@@ -596,7 +636,10 @@ class CounterfactualProgram(ProblogProgram):
                 for r in ins:
                     new_sdd = self._cached_apply(new_sdd, vertex_to_sdd[r[0]], SDDOperation.OR)
                 vertex_to_sdd[cur] = new_sdd
-        
+
+        logger.info(f"  Time spent building the basic SDDs: {time.process_time() - start}")
+
+        start = time.process_time()
         # conjoin all the evidence atoms
         conjoined_evidence = self._sdd_manager.true()
         for name, phase in evidence.items():
@@ -610,6 +653,7 @@ class CounterfactualProgram(ProblogProgram):
         query_sdds = [ vertex_to_sdd[self.intervention_atoms[query]] for query in queries ]
         query_sdds = [ self._cached_apply(query_sdd, conjoined_evidence, SDDOperation.AND) for query_sdd in query_sdds ]
 
+        logger.info(f"  Time spent conjoining the basic SDDs: {time.process_time() - start}")
         # compute the actual probabilities
         # first the probability of the evidence
         evidence_manager = WmcManager(conjoined_evidence, log_mode = False)
