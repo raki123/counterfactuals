@@ -50,50 +50,70 @@ with open(f"ei_instances/tree_{n}_{k}.lp", 'w') as out_file:
             out_file.write(f", \+ delayed({v})")
             out_file.write(".\n")
     
-for nr_evidence in range(-5,6,1):
-    print(nr_evidence)
-    query_node = final_node
-    query = f"reach({query_node})"
-    evidence = [ f"\+reach({query_node})" ]
-    while len(evidence) < abs(nr_evidence) + 1:
-        evidence = [ f"\+reach({query_node})" ]
-        available = set(network.nodes())
-        available.remove(query_node)
-        available.remove(node)
-        negative = []
-        positive = []
-        while len(available) > 0 and len(evidence) < abs(nr_evidence) + 1 :
-            next = random.sample([*available], 1)[0]
-            if nr_evidence > 0:
-                negative.append(next)
-                evidence.append(f"\+reach({next})")
-                available.difference_update(nx.descendants(network, next))
-                available.remove(next)
-            else:
-                positive.append(next)
-                evidence.append(f"reach({next})")
-                available.intersection_update(set(nx.descendants(network, next)))
+
+query_node = final_node
+query = f"reach({query_node})"
+neg_evidence = []
+while len(neg_evidence) < 5:
+    neg_evidence = []
+    available = set(network.nodes())
+    available.remove(query_node)
+    available.remove(node)
+    negative = []
+    positive = []
+    while len(available) > 0 and len(neg_evidence) < 5:
+        next = random.sample([*available], 1)[0]
+        negative.append(next)
+        neg_evidence.append(f"\+reach({next})")
+        available.difference_update(nx.descendants(network, next))
+        available.remove(next)
                 
-    
-    for nr_intervention in range(-5,6,1):
-        intervention = []
-        can_be_on_path = set(nx.ancestors(network, query_node))
-        for atom in random.sample([*can_be_on_path], abs(nr_intervention)):
-            if nr_intervention > 0:
-                intervention.append(f"reach({atom})")
+
+query_node = final_node
+query = f"reach({query_node})"
+pos_evidence = []
+while len(pos_evidence) < 5:
+    pos_evidence = []
+    available = set(network.nodes())
+    available.remove(query_node)
+    available.remove(node)
+    negative = []
+    positive = []
+    while len(available) > 0 and len(pos_evidence) < 5:
+        next = random.sample([*available], 1)[0]
+        positive.append(next)
+        pos_evidence.append(f"reach({next})")
+        available.intersection_update(set(nx.descendants(network, next)))
+
+pos_intervention = []
+neg_intervention = []
+can_be_on_path = set(nx.ancestors(network, query_node))
+for atom in random.sample([*can_be_on_path], 5):
+    pos_intervention.append(f"reach({atom})")
+    neg_intervention.append(f"\+reach({atom})")
+
+path = 'ei_queries.csv'
+if not os.path.exists(path):
+    with open(f"ei_queries.csv", 'a') as csvfile:
+        # creating a csv writer object 
+        fields = [ "file", "query", "evidence", "intervention" ]
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)
+
+# writing to csv file 
+with open(f"ei_queries.csv", 'a') as csvfile:
+    # creating a csv writer object 
+    csvwriter = csv.writer(csvfile)
+    for e in range(-5, 6, 1):
+        for i in range(-5, 6, 1):
+            if e > 0:
+                evidence = [ f"\+reach({query_node})" ] + pos_evidence[:e]
             else:
-                intervention.append(f"\+reach({atom})")
+                evidence = [ f"\+reach({query_node})" ] + neg_evidence[:abs(e)]
 
-        path = 'ei_queries.csv'
-        if not os.path.exists(path):
-            with open(f"ei_queries.csv", 'a') as csvfile:
-                # creating a csv writer object 
-                fields = [ "file", "query", "evidence", "intervention" ]
-                csvwriter = csv.writer(csvfile)
-                csvwriter.writerow(fields)
-
-        # writing to csv file 
-        with open(f"ei_queries.csv", 'a') as csvfile:
-            # creating a csv writer object 
-            csvwriter = csv.writer(csvfile)
+            if i > 0:
+                intervention = pos_intervention[:i]
+            else:
+                intervention = neg_intervention[:abs(i)]
+            
             csvwriter.writerow([ f"tree_{n}_{k}.lp", query, ";".join(evidence), ";".join(intervention) ])
