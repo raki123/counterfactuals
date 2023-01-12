@@ -9,6 +9,24 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib import colors
 from matplotlib import gridspec
 
+def MatplotlibClearMemory():
+    #usedbackend = matplotlib.get_backend()
+    #matplotlib.use('Cairo')
+    allfignums = matplotlib.pyplot.get_fignums()
+    for i in allfignums:
+        fig = matplotlib.pyplot.figure(i)
+        fig.clear()
+        matplotlib.pyplot.close( fig )
+    #matplotlib.use(usedbackend) 
+
+
+paperheight = 11.7
+paperwidth = 8.3
+margin = 1.0
+golden = (1 + 5 ** 0.5) / 2
+fig_width = paperwidth - 2*margin
+fig_height = fig_width/golden
+
 #labels
 TIME_LABEL = "runtime in seconds"
 INSTANCES_LABEL = "number of instances solved"
@@ -48,6 +66,7 @@ for spec in root.find('project').findall('runspec'):
             instances_per_setting[instance.setting].append(instance)
 
 if True:
+    plt.gcf().set_size_inches(fig_width, fig_height)
     max_solved = 0
     for setting in settings:
         if "hard" in setting:
@@ -71,8 +90,11 @@ if True:
     plt.title("Generated Instances", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.show()
+    plt.savefig("generated.pdf")
+    MatplotlibClearMemory()
 
+
+    plt.gcf().set_size_inches(fig_width, fig_height)
     max_solved = 0
     for setting in settings:
         if "easy" in setting:
@@ -96,8 +118,10 @@ if True:
     plt.title("Real Graphs", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.show()
+    plt.savefig("real.pdf")
+    MatplotlibClearMemory()
 
+    plt.gcf().set_size_inches(fig_width, fig_height)
     max_solved = 0
     sharpsat_instances = instances_per_setting["hard_sharpsat"]
     sharpsat_instances += instances_per_setting["easy_sharpsat"]
@@ -129,7 +153,8 @@ if True:
     plt.title("All Instances", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.show()
+    plt.savefig("all.pdf")
+    MatplotlibClearMemory()
 
 
 with open("hard_queries.csv", "r") as queries:
@@ -170,40 +195,36 @@ data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
 data_agg_2 /= width
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(height + 2, width + 2),
-                         gridspec_kw={'width_ratios': [width + 1, 1], 'height_ratios': [1, height + 1], 'wspace': 0.1, 'hspace': 0.1})
+base_width = paperwidth - 2*margin
+base_height = base_width/(2*width + 3)*(height + 1)
+
+fig, axes = plt.subplots(nrows=2, ncols=5, figsize=(base_width, base_height),
+                         gridspec_kw={'width_ratios': [width, 1, width, 1, 1], 'height_ratios': [1, height]})
 
 extent=[0, width, 0, height]
 
 for i in range(2):
-    for j in range(2):
+    for j in range(4):
         axes[i][j].set_xticklabels([str(n) for n in ns[::modval] + [2*ns[::modval][-1] - ns[::modval][-2]]])
         axes[i][j].set_yticklabels([str(k) for k in ks[::modval] + [2*ks[::modval][-1] - ks[::modval][-2]]])
 
-axes[0][0].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect=1/(height + 1), origin='lower')
+axes[0][0].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
 axes[0][0].set_yticks([])
-axes[0][0].xaxis.tick_top()
+axes[0][0].set_xticks([])
 
-axes[1][1].imshow(data_agg_1, interpolation='none', cmap=cmap, extent=extent, aspect=width, origin='lower')
+axes[1][1].imshow(data_agg_1, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
 axes[1][1].set_xticks([])
-axes[1][1].yaxis.tick_right()
+axes[1][1].set_yticks([])
 
-im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
-axes[1][0].set_ylabel("size", size = LABEL_SIZE)
-axes[1][0].set_xlabel("width", size = LABEL_SIZE)
+im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
+axes[1][0].set_ylabel("width", size = LABEL_SIZE)
+axes[1][0].set_xlabel("size", size = LABEL_SIZE)
 
 axes[0][1].axis('off')
 
-
-
-fig.tight_layout()
-
-fig.subplots_adjust(right=0.7)
-cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-cbar = fig.colorbar(im, cax=cbar_ax)
+cbar = fig.colorbar(im, cax=axes[1][4], aspect='auto')
 cbar.ax.get_yaxis().labelpad = 15
 cbar.ax.set_ylabel("runtime in seconds", rotation=270)
-plt.show()
 
 data = np.zeros((int(np.ceil(len(ks)/modval)), int(np.ceil(len(ns)/modval))))
 count = np.zeros((int(np.ceil(len(ks)/modval)), int(np.ceil(len(ns)/modval))))
@@ -224,37 +245,21 @@ data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
 data_agg_2 /= width
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(height + 2, width + 2),
-                         gridspec_kw={'width_ratios': [width + 1, 1], 'height_ratios': [1, height + 1], 'wspace': 0.1, 'hspace': 0.1})
 
-extent=[0, width, 0, height]
+axes[0][2].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
+axes[0][2].set_yticks([])
+axes[0][2].set_xticks([])
 
-for i in range(2):
-    for j in range(2):
-        axes[i][j].set_xticklabels([str(n) for n in ns[::modval] + [2*ns[::modval][-1] - ns[::modval][-2]]])
-        axes[i][j].set_yticklabels([str(k) for k in ks[::modval] + [2*ks[::modval][-1] - ks[::modval][-2]]])
+axes[1][3].imshow(data_agg_1, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
+axes[1][3].set_yticks([])
+axes[1][3].set_xticks([])
 
-axes[0][0].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect=1/(height + 1), origin='lower')
-axes[0][0].set_yticks([])
-axes[0][0].xaxis.tick_top()
+im = axes[1][2].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
+axes[1][2].set_yticks([])
+axes[1][2].set_xlabel("size", size = LABEL_SIZE)
 
-axes[1][1].imshow(data_agg_1, interpolation='none', cmap=cmap, extent=extent, aspect=width, origin='lower')
-axes[1][1].set_xticks([])
-axes[1][1].yaxis.tick_right()
+axes[0][3].axis('off')
+axes[0][4].axis('off')
 
-im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
-axes[1][0].set_ylabel("size", size = LABEL_SIZE)
-axes[1][0].set_xlabel("width", size = LABEL_SIZE)
-
-axes[0][1].axis('off')
-
-
-
-fig.tight_layout()
-
-fig.subplots_adjust(right=0.7)
-cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-cbar = fig.colorbar(im, cax=cbar_ax)
-cbar.ax.get_yaxis().labelpad = 15
-cbar.ax.set_ylabel("runtime in seconds", rotation=270)
-plt.show()
+plt.tight_layout()
+plt.savefig("scaling.pdf")
