@@ -16,7 +16,7 @@ from aspmc.config import config
 config["decot"] = '10'
 
 base_path = '/mnt/vg01/lv01/home/rkiesel/benchmark-tool/cf_transit/'
-base_path = '/home/rafael/projects/counterfactuals/benchmarks/'
+base_path = '/home/staff/rkiesel/projects/counterfactual/benchmarks/'
 strategy = "sharpsat-td"
 # parse the arguments
 while len(sys.argv) > 1:

@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from matplotlib.ticker import MaxNLocator
 from matplotlib import colors
 from matplotlib import gridspec
+import matplotlib.ticker as mticker
 
 def MatplotlibClearMemory():
     #usedbackend = matplotlib.get_backend()
@@ -90,7 +91,7 @@ if True:
     plt.title("Generated Instances", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.savefig("generated.pdf")
+    plt.savefig("plots/generated.pdf")
     MatplotlibClearMemory()
 
 
@@ -118,7 +119,7 @@ if True:
     plt.title("Real Graphs", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.savefig("real.pdf")
+    plt.savefig("plots/real.pdf")
     MatplotlibClearMemory()
 
     plt.gcf().set_size_inches(fig_width, fig_height)
@@ -153,7 +154,7 @@ if True:
     plt.title("All Instances", size = LABEL_SIZE)
     plt.legend(loc="best", prop={'size': LABEL_SIZE})
     plt.tight_layout()
-    plt.savefig("all.pdf")
+    plt.savefig("plots/all.pdf")
     MatplotlibClearMemory()
 
 
@@ -186,13 +187,12 @@ for instance in instances_per_setting["hard_sharpsat"]:
     count[[k_to_idx[k]],n_to_idx[n]] += 1
 
 data /= count
-
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
-data_agg_1 /= height
+data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
-data_agg_2 /= width
+data_agg_2 /= height
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
 base_width = paperwidth - 2*margin
@@ -205,8 +205,13 @@ extent=[0, width, 0, height]
 
 for i in range(2):
     for j in range(4):
-        axes[i][j].set_xticklabels([str(n) for n in ns[::modval] + [2*ns[::modval][-1] - ns[::modval][-2]]])
-        axes[i][j].set_yticklabels([str(k) for k in ks[::modval] + [2*ks[::modval][-1] - ks[::modval][-2]]])
+        ticks_loc = [ i for i in range(width + 1) ]
+        axes[i][j].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+        axes[i][j].set_xticklabels([str(n) for n in ns[::modval] + [2*ns[::modval][-1] - ns[::modval][-2]]], size = 6)
+        ticks_loc = [ i for i in range(height + 1) ]
+        axes[i][j].yaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+        axes[i][j].set_yticklabels([str(k) for k in ks[::modval] + [2*ks[::modval][-1] - ks[::modval][-2]]], size = 6)
+
 
 axes[0][0].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
 axes[0][0].set_yticks([])
@@ -236,13 +241,12 @@ for instance in instances_per_setting["hard_pysdd"]:
     count[[k_to_idx[k]],n_to_idx[n]] += 1
 
 data /= count
-
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
-data_agg_1 /= height
+data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
-data_agg_2 /= width
+data_agg_2 /= height
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
 
@@ -262,4 +266,4 @@ axes[0][3].axis('off')
 axes[0][4].axis('off')
 
 plt.tight_layout()
-plt.savefig("scaling.pdf")
+plt.savefig("plots/scaling.pdf")

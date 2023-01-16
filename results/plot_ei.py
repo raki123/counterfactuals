@@ -83,13 +83,12 @@ for instance in instances_per_setting["sharpsat"]:
     count[i_to_idx[i],e_to_idx[e]] += 1
 
 data /= count
-
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
-data_agg_1 /= height
+data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
-data_agg_2 /= width
+data_agg_2 /= height
 cmap = matplotlib.colormaps.get_cmap("inferno")
 
 base_width = paperwidth - 2*margin
@@ -137,13 +136,13 @@ for instance in instances_per_setting["pysdd"]:
     count[i_to_idx[i],e_to_idx[e]] += 1
 
 data /= count
-
 data_agg_1 = np.zeros((height, 1))
 data_agg_1[:,0] = [ sum(data[i,:]) for i in range(height) ]
-data_agg_1 /= height
+data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
-data_agg_2 /= width
+data_agg_2 /= height
+cmap = matplotlib.colormaps.get_cmap("inferno")
 
 axes[0][2].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
 axes[0][2].set_yticks([])
@@ -162,4 +161,4 @@ axes[0][3].axis('off')
 axes[0][4].axis('off')
 
 plt.tight_layout()
-plt.savefig("EI.pdf")
+plt.savefig("plots/EI.pdf")
