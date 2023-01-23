@@ -71,8 +71,8 @@ Is = list(set( k for n,k in line_to_ei ))
 Is.sort()
 e_to_idx = { n : (i//modval) for i,n in enumerate(es)}
 i_to_idx = { k : (i//modval) for i,k in enumerate(Is)}
-height = len(Is)
-width = len(es)
+height = int(np.ceil(len(Is)/modval))
+width = int(np.ceil(len(es)/modval))
 data = np.zeros((height, width))
 count = np.zeros((height, width))
 
@@ -101,12 +101,12 @@ extent=[0, width, 0, height]
 
 for i in range(2):
     for j in range(4):
-        ticks_loc = [ i + 0.5 for i in range(len(es)) ]
+        ticks_loc = [ i + 0.5 for i in range(width) ]
         axes[i][j].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
-        axes[i][j].set_xticklabels([str(n) for n in es])
-        ticks_loc = [ i + 0.5 for i in range(len(Is)) ]
+        axes[i][j].set_xticklabels([str(n) for n in es[::modval]], size = 6)
+        ticks_loc = [ i + 0.5 for i in range(height) ]
         axes[i][j].yaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
-        axes[i][j].set_yticklabels([str(k) for k in Is])
+        axes[i][j].set_yticklabels([str(k) for k in Is[::modval]], size = 6)
 
 axes[0][0].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
 axes[0][0].set_yticks([])

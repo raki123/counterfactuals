@@ -273,6 +273,8 @@ class CounterfactualProgram(ProblogProgram):
             # build the relevant sdds by traversing the graph in topological order
             ts = nx.topological_sort(graph)
             for cur in ts:
+                if cur not in relevant:
+                    continue
                 if isinstance(cur, Rule):
                     new_sdd = sdd.true()
                     for b in cur.body:
@@ -710,7 +712,17 @@ class CounterfactualProgram(ProblogProgram):
             graph.add_edges_from([ (a, v) for v in inputs[1] ])
             
         td = treedecomposition.from_graph(graph, solver = config["decos"], timeout = str(float(config["decot"])))
+        logger.info(f"Tree Decomposition #bags: {td.bags} unfolded treewidth: {td.width} #vertices: {td.vertices}")
         td.remove(set(range(1, cur_max + 1)).difference(self._guess))
+        seen = set()
+        for bag in td.bag_iter():
+            seen.update(bag.vertices)
+        for unseen in self._guess.difference(seen):
+            td.bags += 1
+            bag = treedecomposition.Bag(td.bags, set([unseen]), [])
+            td.tree.add_edge(td.root, td.bags)
+            td.tree.nodes[td.bags]["bag"] = bag
+            td.get_root().children.append(bag)
         my_vtree = TD_to_vtree(td)
         guesses = list(self._guess)
         rev_mapping = { guesses[i] : i + 1 for i in range(len(self._guess)) }
