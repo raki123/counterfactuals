@@ -83,7 +83,6 @@
 			<instance name="gnb_7_0.pl" id="73"/>
 			<instance name="gnb_8_0.pl" id="74"/>
 			<instance name="gnb_9_0.pl" id="75"/>
-			<instance name="out_preprocessed.cnf" id="76"/>
 			<instance name="smokers_10_2prob.lp" id="77"/>
 			<instance name="smokers_10_3prob.lp" id="78"/>
 			<instance name="smokers_10_4prob.lp" id="79"/>
@@ -18634,52 +18633,6 @@
 						<measure name="tree_width_cnf" type="long" val="29"/>
 						<measure name="tree_width_unfolded" type="long" val="10"/>
 						<measure name="wall" type="float" val="60.1636"/>
-					</run>
-				</instance>
-				<instance id="76">
-					<run number="1">
-						<measure name="error" type="int" val="0"/>
-						<measure name="error_str" type="string" val=""/>
-						<measure name="full_call" type="string" val="None"/>
-						<measure name="full_path" type="string" val="output/aspmc_v2_choose_t/cobra/results/all_problog/aspmc-2.0-aspmc_c_s/./out_preprocessed.cnf/run1"/>
-						<measure name="hash" type="string" val="None"/>
-						<measure name="instance" type="string" val="out_preprocessed.cnf"/>
-						<measure name="memerror" type="string" val="NA"/>
-						<measure name="memlimit" type="int" val="32342"/>
-						<measure name="memusage" type="float" val="95.68"/>
-						<measure name="run" type="int" val="0"/>
-						<measure name="setting" type="string" val="aspmc_c_s"/>
-						<measure name="solved" type="int" val="0"/>
-						<measure name="solver" type="string" val="aspmc"/>
-						<measure name="solver_args" type="string" val=" -m problog -c -dt 10 -v debug -g choose -t -k sharpsat-td"/>
-						<measure name="solver_version" type="string" val="2.0"/>
-						<measure name="status" type="string" val="NA"/>
-						<measure name="time" type="float" val="1801"/>
-						<measure name="timelimit" type="int" val="1800"/>
-						<measure name="timeout" type="float" val="1"/>
-						<measure name="wall" type="float" val="1.01159"/>
-					</run>
-					<run number="2">
-						<measure name="error" type="int" val="0"/>
-						<measure name="error_str" type="string" val=""/>
-						<measure name="full_call" type="string" val="None"/>
-						<measure name="full_path" type="string" val="output/aspmc_v2_choose_t/cobra/results/all_problog/aspmc-2.0-aspmc_c_s/./out_preprocessed.cnf/run2"/>
-						<measure name="hash" type="string" val="None"/>
-						<measure name="instance" type="string" val="out_preprocessed.cnf"/>
-						<measure name="memerror" type="string" val="NA"/>
-						<measure name="memlimit" type="int" val="32342"/>
-						<measure name="memusage" type="float" val="95.59"/>
-						<measure name="run" type="int" val="0"/>
-						<measure name="setting" type="string" val="aspmc_c_s"/>
-						<measure name="solved" type="int" val="0"/>
-						<measure name="solver" type="string" val="aspmc"/>
-						<measure name="solver_args" type="string" val=" -m problog -c -dt 10 -v debug -g choose -t -k sharpsat-td"/>
-						<measure name="solver_version" type="string" val="2.0"/>
-						<measure name="status" type="string" val="NA"/>
-						<measure name="time" type="float" val="1801"/>
-						<measure name="timelimit" type="int" val="1800"/>
-						<measure name="timeout" type="float" val="1"/>
-						<measure name="wall" type="float" val="0.785926"/>
 					</run>
 				</instance>
 				<instance id="45">
