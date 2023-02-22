@@ -83,7 +83,6 @@
 			<instance name="gnb_7_0.pl" id="73"/>
 			<instance name="gnb_8_0.pl" id="74"/>
 			<instance name="gnb_9_0.pl" id="75"/>
-			<instance name="out_preprocessed.cnf" id="76"/>
 			<instance name="smokers_10_2prob.lp" id="77"/>
 			<instance name="smokers_10_3prob.lp" id="78"/>
 			<instance name="smokers_10_4prob.lp" id="79"/>
@@ -21129,74 +21128,6 @@
 						<measure name="timelimit" type="int" val="1800"/>
 						<measure name="timeout" type="float" val="0"/>
 						<measure name="wall" type="float" val="42.555"/>
-					</run>
-				</instance>
-				<instance id="76">
-					<run number="1">
-						<measure name="error" type="int" val="0"/>
-						<measure name="error_str" type="string" val=""/>
-						<measure name="full_call" type="string" val="None"/>
-						<measure name="full_path" type="string" val="output/problog_problog5/cobra/results/all_Count_aspmc/problog-2.1-problog/./out_preprocessed.cnf/run1"/>
-						<measure name="hash" type="string" val="None"/>
-						<measure name="instance" type="string" val="out_preprocessed.cnf"/>
-						<measure name="memerror" type="string" val="NA"/>
-						<measure name="memlimit" type="int" val="8336"/>
-						<measure name="memusage" type="float" val="152.55"/>
-						<measure name="run" type="int" val="0"/>
-						<measure name="setting" type="string" val="problog"/>
-						<measure name="solved" type="int" val="0"/>
-						<measure name="solver" type="string" val="problog"/>
-						<measure name="solver_args" type="string" val="-k ddnnf"/>
-						<measure name="solver_version" type="string" val="2.1"/>
-						<measure name="status" type="string" val="NA"/>
-						<measure name="time" type="float" val="1801"/>
-						<measure name="timelimit" type="int" val="1800"/>
-						<measure name="timeout" type="float" val="1"/>
-						<measure name="wall" type="float" val="4.71197"/>
-					</run>
-					<run number="2">
-						<measure name="error" type="int" val="0"/>
-						<measure name="error_str" type="string" val=""/>
-						<measure name="full_call" type="string" val="None"/>
-						<measure name="full_path" type="string" val="output/problog_problog5/cobra/results/all_Count_aspmc/problog-2.1-problog/./out_preprocessed.cnf/run2"/>
-						<measure name="hash" type="string" val="None"/>
-						<measure name="instance" type="string" val="out_preprocessed.cnf"/>
-						<measure name="memerror" type="string" val="NA"/>
-						<measure name="memlimit" type="int" val="8336"/>
-						<measure name="memusage" type="float" val="152.41"/>
-						<measure name="run" type="int" val="0"/>
-						<measure name="setting" type="string" val="problog"/>
-						<measure name="solved" type="int" val="0"/>
-						<measure name="solver" type="string" val="problog"/>
-						<measure name="solver_args" type="string" val="-k ddnnf"/>
-						<measure name="solver_version" type="string" val="2.1"/>
-						<measure name="status" type="string" val="NA"/>
-						<measure name="time" type="float" val="1801"/>
-						<measure name="timelimit" type="int" val="1800"/>
-						<measure name="timeout" type="float" val="1"/>
-						<measure name="wall" type="float" val="1.99956"/>
-					</run>
-					<run number="3">
-						<measure name="error" type="int" val="0"/>
-						<measure name="error_str" type="string" val=""/>
-						<measure name="full_call" type="string" val="None"/>
-						<measure name="full_path" type="string" val="output/problog_problog5/cobra/results/all_Count_aspmc/problog-2.1-problog/./out_preprocessed.cnf/run3"/>
-						<measure name="hash" type="string" val="None"/>
-						<measure name="instance" type="string" val="out_preprocessed.cnf"/>
-						<measure name="memerror" type="string" val="NA"/>
-						<measure name="memlimit" type="int" val="8336"/>
-						<measure name="memusage" type="float" val="152.45"/>
-						<measure name="run" type="int" val="0"/>
-						<measure name="setting" type="string" val="problog"/>
-						<measure name="solved" type="int" val="0"/>
-						<measure name="solver" type="string" val="problog"/>
-						<measure name="solver_args" type="string" val="-k ddnnf"/>
-						<measure name="solver_version" type="string" val="2.1"/>
-						<measure name="status" type="string" val="NA"/>
-						<measure name="time" type="float" val="1801"/>
-						<measure name="timelimit" type="int" val="1800"/>
-						<measure name="timeout" type="float" val="1"/>
-						<measure name="wall" type="float" val="1.76464"/>
 					</run>
 				</instance>
 				<instance id="45">

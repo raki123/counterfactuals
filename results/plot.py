@@ -377,7 +377,7 @@ for spec in root.find('project').findall('runspec'):
                 continue
 
 
-results_file = "problog_v2_nosdd.xml"
+results_file = "problog_v3_olds.xml"
 tree = ET.parse(results_file)
 root = tree.getroot()
 
@@ -391,7 +391,7 @@ for spec in root.find('project').findall('runspec'):
                 ins.time = instance.time
 
 
-results_file = "problog_more.xml"
+results_file = "problog_v3.xml"
 tree = ET.parse(results_file)
 root = tree.getroot()
 
@@ -401,7 +401,7 @@ for spec in root.find('project').findall('runspec'):
             instance = Instance()
             instance.time = float(run.find('.//measure[@name="time"]').get('val'))
             instance.setting = run.find('.//measure[@name="setting"]').get('val')
-            if instance.setting == "problog_d":
+            if instance.setting == "problog":
                 instance.name = run.find('.//measure[@name="instance"]').get('val')
                 for ins in name_to_instances[instance.name]:
                     ins.time = instance.time
