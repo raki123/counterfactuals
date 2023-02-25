@@ -99,7 +99,8 @@ if True:
     plt.show()
 
     max_solved = 0
-    sharpsat_instances = instances_per_setting["hard_sharpsat"]
+    sharpsat_instances = []
+    sharpsat_instances += instances_per_setting["hard_sharpsat"]
     sharpsat_instances += instances_per_setting["easy_sharpsat"]
     x = [float(inst.time) for inst in sharpsat_instances]
     x.sort()
@@ -109,7 +110,8 @@ if True:
                 max_solved = i + 1
             break
     plt.plot(range(1, len(sharpsat_instances) + 1), x, label="sharpsat")
-    pysdd_instances = instances_per_setting["hard_pysdd"]
+    pysdd_instances = []
+    pysdd_instances += instances_per_setting["hard_pysdd"]
     pysdd_instances += instances_per_setting["easy_pysdd"]
     x = [float(inst.time) for inst in pysdd_instances]
     x.sort()
@@ -189,8 +191,8 @@ axes[1][1].set_xticks([])
 axes[1][1].yaxis.tick_right()
 
 im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
-axes[1][0].set_ylabel("size", size = LABEL_SIZE)
-axes[1][0].set_xlabel("width", size = LABEL_SIZE)
+axes[1][0].set_ylabel("width", size = LABEL_SIZE)
+axes[1][0].set_xlabel("size", size = LABEL_SIZE)
 
 axes[0][1].axis('off')
 
@@ -243,8 +245,8 @@ axes[1][1].set_xticks([])
 axes[1][1].yaxis.tick_right()
 
 im = axes[1][0].imshow(data, interpolation='none', cmap=cmap, extent=extent, aspect=1, origin='lower')
-axes[1][0].set_ylabel("size", size = LABEL_SIZE)
-axes[1][0].set_xlabel("width", size = LABEL_SIZE)
+axes[1][0].set_ylabel("width", size = LABEL_SIZE)
+axes[1][0].set_xlabel("size", size = LABEL_SIZE)
 
 axes[0][1].axis('off')
 
