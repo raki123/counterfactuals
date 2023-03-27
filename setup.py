@@ -24,7 +24,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name='CFInfer',  # Required
+    name='counterfactuals',  # Required
 
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
@@ -32,12 +32,12 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version='0.1',  # Required
+    version='1.0.0',  # Required
 
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
-    description='A solver for CounterFactual INFerence.',  # Optional
+    description='A solver for Counterfactual Inference.',  # Optional
 
     # This is an optional longer description of your project that represents
     # the body of text which users will see when they visit PyPI.
@@ -65,7 +65,7 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    # url='https://github.com/raki123/aspmc',  # Optional
+    # url='',  # Optional
 
     # This should be your name or the name of the organization which owns the
     # project.
@@ -110,7 +110,7 @@ setup(
     # Note that this is a list of additional keywords, separated
     # by commas, to be used to assist searching for the distribution in a
     # larger catalog.
-    keywords='probabilistic, logic programming, answer set programming',  # Optional
+    keywords='probabilistic, logic programming, counterfactual reasoning',  # Optional
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
@@ -139,7 +139,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
-    install_requires=['aspmc', 'git+https://github.com/wannesm/PySDD.git#egg=PySDD'],  # Optional
+    install_requires=['aspmc', 'PySDD'],  # Optional
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
@@ -176,7 +176,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'CFInfer=counterfactual.main:main',
+            'WhatIf=counterfactuals.main:main',
         ],
     },
     license="MIT",

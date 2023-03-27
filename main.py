@@ -8,19 +8,45 @@ Main module providing the application logic.
 import sys
 import logging
 
-from counterfactual.counterfactualprogram import CounterfactualProgram
+from counterfactuals.counterfactualprogram import CounterfactualProgram
 
 import aspmc.config as config
 
 from aspmc.main import logger as aspmc_logger
 
 
-logger = logging.getLogger("CFInfer")
+logger = logging.getLogger("WhatIf")
 logging.basicConfig(format='[%(levelname)s] %(name)s: %(message)s', level="INFO")
 logger.setLevel(logging.INFO)
 
 help_string = """
-TODO
+WhatIf: A solver for counterfactual inference.
+WhatIf version 1.0.0, Mar 27, 2023
+
+WhatIf [-e .] [-ds .] [-dt .] [-k .] [-v .] [-h] [<INPUT-FILES>]
+    --knowlege          -k  COMPILER    set the knowledge compiler to COMPILER:
+                                        * sharpsat-td       : uses a compilation version of sharpsat-td (default)
+                                        * d4                : uses the (slightly modified) d4 compiler. 
+                                        * c2d               : uses the c2d compiler. 
+                                        * miniC2D           : uses the miniC2D compiler. 
+                                        * pysdd             : uses the PySDD compiler. 
+    --evidence          -e  NAME,PHASE  add evidence NAME:
+                                        * the evidence is negated if PHASE is `True`.
+                                        * the evidence is not negated if PHASE is `False`.
+    --intervene         -i  NAME,PHASE  intervene on NAME:
+                                        * the intervention is negative if PHASE is `True`.
+                                        * the intervention is not negative if PHASE is `False`.
+    --query             -q  NAME        query for the probability of NAME.
+    --decos             -ds SOLVER      set the solver that computes tree decompositions to SOLVER:
+                                        * flow-cutter       : uses flow_cutter_pace17 (default)
+    --decot             -dt SECONDS     set the timeout for computing tree decompositions to SECONDS (default: 1)
+    --verbosity         -v  VERBOSITY   set the logging level to VERBOSITY:
+                                        * debug             : print everything
+                                        * info              : print as usual
+                                        * result            : only print results, warnings and errors
+                                        * warning           : only print warnings and errors
+                                        * errors            : only print errors
+    --help              -h              print this help and exit
 """
 
 def main():
