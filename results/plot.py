@@ -193,7 +193,7 @@ data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
 data_agg_2 /= height
-cmap = matplotlib.colormaps.get_cmap("inferno")
+cmap = matplotlib.colormaps.get_cmap("winter")
 
 base_width = paperwidth - 2*margin
 base_height = base_width/(2*width + 3)*(height + 1)
@@ -247,7 +247,7 @@ data_agg_1 /= width
 data_agg_2 = np.zeros((1, width))
 data_agg_2[0,:] = [ sum(data[:,i]) for i in range(width) ]
 data_agg_2 /= height
-cmap = matplotlib.colormaps.get_cmap("inferno")
+cmap = matplotlib.colormaps.get_cmap("winter")
 
 
 axes[0][2].imshow(data_agg_2, interpolation='none', cmap=cmap, extent=extent, aspect='auto', origin='lower', vmin = 0, vmax = 1800)
