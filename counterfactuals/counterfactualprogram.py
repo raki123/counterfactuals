@@ -32,7 +32,7 @@ from aspmc.programs.naming import *
 
 import aspmc.signal_handling as my_signals
 
-logger = logging.getLogger("CFInfer")
+logger = logging.getLogger("WhatIf")
 
 class SDDOperation(object):
     AND = 0
