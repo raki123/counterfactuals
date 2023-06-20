@@ -30,12 +30,12 @@ WhatIf [-e .] [-ds .] [-dt .] [-k .] [-v .] [-h] [<INPUT-FILES>]
                                         * c2d               : uses the c2d compiler. 
                                         * miniC2D           : uses the miniC2D compiler. 
                                         * pysdd             : uses the PySDD compiler. 
-    --evidence          -e  NAME,PHASE  add evidence NAME:
-                                        * the evidence is negated if PHASE is `True`.
-                                        * the evidence is not negated if PHASE is `False`.
-    --intervene         -i  NAME,PHASE  intervene on NAME:
-                                        * the intervention is negative if PHASE is `True`.
-                                        * the intervention is not negative if PHASE is `False`.
+    --evidence          -e  NAME,VALUE  add evidence NAME:
+                                        * the evidence is not negated if VALUE is `True`.
+                                        * the evidence is negated if VALUE is `False`.
+    --intervene         -i  NAME,VALUE  intervene on NAME:
+                                        * the intervention is not negated if VALUE is `True`.
+                                        * the intervention is negated if VALUE is `False`.
     --query             -q  NAME        query for the probability of NAME.
     --decos             -ds SOLVER      set the solver that computes tree decompositions to SOLVER:
                                         * flow-cutter       : uses flow_cutter_pace17 (default)
@@ -89,31 +89,31 @@ def main():
             elif sys.argv[1] == "-e" or sys.argv[1] == "--evidence":
                 last_comma = sys.argv[2].rfind(",")
                 if last_comma == -1:
-                    logger.error(f" Invalid evidence string {sys.argv[2]}.\nExpected a string of the form `name,phase`, \
-                        where name is the name of an atom and phase is either `True` or `False`")
+                    logger.error(f" Invalid evidence string {sys.argv[2]}.\nExpected a string of the form `name,value`, \
+                        where name is the name of an atom and value is either `True` or `False`")
                 name = sys.argv[2][:last_comma]
-                phase = sys.argv[2][last_comma + 1:]
-                if phase != "True" and phase != "False":
-                    logger.error(f" Invalid evidence string {sys.argv[2]}.\nExpected a string of the form `name,phase`, \
-                        where name is the name of an atom and phase is either `True` or `False`")
-                phase = True if phase == "True" else False
+                value = sys.argv[2][last_comma + 1:]
+                if value != "True" and value != "False":
+                    logger.error(f" Invalid evidence string {sys.argv[2]}.\nExpected a string of the form `name,value`, \
+                        where name is the name of an atom and value is either `True` or `False`")
+                phase = False if value == "True" else True
                 if name in evidence:
-                    logger.warning(f"   Double specification of evidence for atom {name}. Using the last specified phase {phase}.")
+                    logger.warning(f"   Double specification of evidence for atom {name}. Using the last specified value {value}.")
                 evidence[name] = phase
                 del sys.argv[1:3]
             elif sys.argv[1] == "-i" or sys.argv[1] == "--intervene":
                 last_comma = sys.argv[2].rfind(",")
                 if last_comma == -1:
-                    logger.error(f" Invalid intervention string {sys.argv[2]}.\nExpected a string of the form `name,phase`, \
-                        where name is the name of an atom and phase is either `True` or `False`")
+                    logger.error(f" Invalid intervention string {sys.argv[2]}.\nExpected a string of the form `name,value`, \
+                        where name is the name of an atom and value is either `True` or `False`")
                 name = sys.argv[2][:last_comma]
-                phase = sys.argv[2][last_comma + 1:]
-                if phase != "True" and phase != "False":
-                    logger.error(f" Invalid intervention string {sys.argv[2]}.\nExpected a string of the form `name,phase`, \
-                        where name is the name of an atom and phase is either `True` or `False`")
-                phase = True if phase == "True" else False
+                value = sys.argv[2][last_comma + 1:]
+                if value != "True" and value != "False":
+                    logger.error(f" Invalid intervention string {sys.argv[2]}.\nExpected a string of the form `name,value`, \
+                        where name is the name of an atom and value is either `True` or `False`")
+                phase = False if value == "True" else True
                 if name in interventions:
-                    logger.warning(f"   Double specification of intervention for atom {name}. Using the last specified phase {phase}.")
+                    logger.warning(f"   Double specification of intervention for atom {name}. Using the last specified value {value}.")
                 interventions[name] = phase
                 del sys.argv[1:3]
             elif sys.argv[1] == "-q" or sys.argv[1] == "--query":
