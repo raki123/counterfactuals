@@ -48,12 +48,12 @@ WhatIf [-e .] [-ds .] [-dt .] [-k .] [-v .] [-h] [<INPUT-FILES>]
                                         * c2d               : uses the c2d compiler. 
                                         * miniC2D           : uses the miniC2D compiler. 
                                         * pysdd             : uses the PySDD compiler. 
-    --evidence          -e  NAME,PHASE  add evidence NAME:
-                                        * the evidence is negated if PHASE is `True`.
-                                        * the evidence is not negated if PHASE is `False`.
-    --intervene         -i  NAME,PHASE  intervene on NAME:
-                                        * the intervention is negative if PHASE is `True`.
-                                        * the intervention is not negative if PHASE is `False`.
+    --evidence          -e  NAME,VALUE  add evidence NAME:
+                                        * the evidence is not negated if VALUE is `True`.
+                                        * the evidence is negated if VALUE is `False`.
+    --intervene         -i  NAME,VALUE  intervene on NAME:
+                                        * the intervention is not negated if VALUE is `True`.
+                                        * the intervention is negated if VALUE is `False`.
     --query             -q  NAME        query for the probability of NAME.
     --decos             -ds SOLVER      set the solver that computes tree decompositions to SOLVER:
                                         * flow-cutter       : uses flow_cutter_pace17 (default)
@@ -71,7 +71,7 @@ WhatIf [-e .] [-ds .] [-dt .] [-k .] [-v .] [-h] [<INPUT-FILES>]
 When using the pip package replace `python main.py` by `WhatIf` to obtain the same result.
 #### ASP example:
 ```
-python main.py -q slippery -e sprinkler,False -i sprinkler,True -k sharpsat-td
+python main.py -q slippery -e sprinkler,True -i sprinkler,False -k sharpsat-td
 0.5::u1.
 0.7::u2.
 0.1::u3.
