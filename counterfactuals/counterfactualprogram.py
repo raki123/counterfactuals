@@ -199,6 +199,7 @@ class CounterfactualProgram(ProblogProgram):
             # reduce the program to the relevant part
             # set up the and/or graph
             graph = nx.DiGraph()
+            graph.add_nodes_from(i + 1 for i in range(self._max))
             for r in tmp_program:
                 for atom in r.head:
                     graph.add_edge(r, atom)
@@ -240,7 +241,10 @@ class CounterfactualProgram(ProblogProgram):
             to_idx = { query : idx for idx, query in enumerate(other_queries) }
             sorted_result = [ ]
             for query in self.queries:
-                sorted_result.append(result[to_idx[query]])
+                if query in to_idx:
+                    sorted_result.append(result[to_idx[query]])
+                else:
+                    sorted_result.append(0.0)
             if sorted_result[0] <= 0.0:
                 raise Exception("Contradictory evidence! Probablity given evidence is zero.")
             final_results = [ value/sorted_result[0] for value in sorted_result[1:] ] 
@@ -254,6 +258,7 @@ class CounterfactualProgram(ProblogProgram):
 
             # set up the and/or graph
             graph = nx.DiGraph()
+            graph.add_nodes_from(i + 1 for i in range(self._max))
             for r in tmp_program:
                 for atom in r.head:
                     graph.add_edge(r, atom)
