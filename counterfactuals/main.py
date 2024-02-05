@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 
 help_string = """
 WhatIf: A solver for counterfactual inference.
-WhatIf version 1.0.0, Mar 27, 2023
+WhatIf version 1.0.2, Feb 5, 2024
 
 WhatIf [-e .] [-ds .] [-dt .] [-k .] [-v .] [-h] [<INPUT-FILES>]
     --knowlege          -k  COMPILER    set the knowledge compiler to COMPILER:
